@@ -179,37 +179,6 @@ func (sig *Signatory) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// MarshalJSON implements the `json.Marshaler` interface for the Signatory type.
-// func (sig Signatory) MarshalJSON() ([]byte, error) {
-// 	println("CALLED")
-// 	return json.Marshal(sig[:])
-// }
-
-// UnmarshalJSON implements the `json.Unmarshaler` interface for the Signatory type.
-// func (sig *Signatory) UnmarshalJSON(data []byte) error {
-// 	v := []byte{}
-// 	if err := json.Unmarshal(data, &v); err != nil {
-// 		return err
-// 	}
-// 	if len(v) != SignatoryLength {
-// 		return ErrInvalidJsonBytes(*sig, SignatoryLength, len(v))
-// 	}
-// 	copy(sig[:], v)
-// 	return nil
-// text, err := hex.DecodeString(string(data))
-// if err != nil {
-// 	return err
-// }
-//
-// // if len(data) != SignatoryLength {
-// // 	return ErrInvalidJsonBytes(sig, SignatoryLength, len(sig))
-// // }
-//
-// copy(sig[:], text)
-//
-// return nil
-// }
-
 // Hash returns a 256-bit SHA3 hash of the Signatories by converting them into
 // bytes and concatenating them to each other.
 func (sigs Signatories) Hash() Hash {

@@ -9,12 +9,10 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/renproject/hyperdrive/id"
-	. "github.com/renproject/hyperdrive/testutil"
+	. "github.com/renproject/id"
 )
 
 var _ = Describe("ID", func() {
-
 	Context("Hash", func() {
 		Context("when two hashes are equal", func() {
 			It("should be stringified to the same string", func() {
