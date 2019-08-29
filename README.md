@@ -1,4 +1,4 @@
-# `🔑 id`
+# `🔒 id`
 
 [![CircleCI](https://circleci.com/gh/renproject/id/tree/master.svg?style=shield)](https://circleci.com/gh/renproject/hyperdrive/tree/master)
 ![Go Report](https://goreportcard.com/badge/github.com/renproject/id)
