@@ -7,6 +7,5 @@
 ECDSA identification for content and content authorship
 
 ## Contributors
----------------
 
 Built with ❤ by Ren.
