@@ -54,21 +54,24 @@ func (hash Hash) String() string {
 	return base64.RawStdEncoding.EncodeToString(hash[:])
 }
 
-// MarshalJSON implements the `json.Marshaler` interface for the Hash type.
-func (hash Hash) MarshalJSON() ([]byte, error) {
-	return json.Marshal(hash[:])
+// MarshalText implements `encoding.TextMarshaler` so that it can be used as
+// key of a map when marshaling/unmarshaling.
+func (hash Hash) MarshalText() (text []byte, err error) {
+	return []byte(base64.RawStdEncoding.EncodeToString(hash[:])), nil
 }
 
-// UnmarshalJSON implements the `json.Unmarshaler` interface for the Hash type.
-func (hash *Hash) UnmarshalJSON(data []byte) error {
-	v := []byte{}
-	if err := json.Unmarshal(data, &v); err != nil {
-		return err
+// MarshalText implements `encoding.TextUnmarshaler` so that it can be used as
+// key of a map when marshaling/unmarshaling.
+func (hash *Hash) UnmarshalText(text []byte) error {
+	data, err := base64.RawStdEncoding.DecodeString(string(text))
+	if err != nil {
+		return fmt.Errorf("error decoding hash text: %v", err)
 	}
-	if len(v) != HashLength {
-		return ErrInvalidJsonBytes(*hash, HashLength, len(v))
+	if len(data) != HashLength {
+		return ErrInvalidJsonBytes(hash, HashLength, len(hash))
 	}
-	copy(hash[:], v)
+
+	copy(hash[:], data)
 	return nil
 }
 
