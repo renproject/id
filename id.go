@@ -3,11 +3,10 @@ package id
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-
-	"golang.org/x/crypto/sha3"
 )
 
 // Constants represent the length of the variables.
@@ -41,7 +40,7 @@ func (hashes Hashes) Equal(other Hashes) bool {
 	return true
 }
 
-// Hash defines the output of the 256-bit SHA3 hashing function.
+// Hash defines the output of the 256-bit SHA2 hashing function.
 type Hash [32]byte
 
 // Equal compares one Hash with another.
@@ -91,14 +90,14 @@ func (sigs Signatures) Equal(other Signatures) bool {
 	return true
 }
 
-// Hash returns a 256-bit SHA3 hash of the Signatures by converting them into
+// Hash returns a 256-bit SHA2 hash of the Signatures by converting them into
 // bytes and concatenating them to each other.
 func (sigs Signatures) Hash() Hash {
 	data := make([]byte, 0, 64*len(sigs))
 	for _, sig := range sigs {
 		data = append(data, sig[:]...)
 	}
-	return sha3.Sum256(data)
+	return sha256.Sum256(data)
 }
 
 // String implements the `fmt.Stringer` interface for the Signatures type.
@@ -148,7 +147,7 @@ type Signatory [32]byte
 // NewSignatory returns the the Signatory of the given ECSDA.PublicKey
 func NewSignatory(pubKey ecdsa.PublicKey) Signatory {
 	pubKeyBytes := append(pubKey.X.Bytes(), pubKey.Y.Bytes()...)
-	return sha3.Sum256(pubKeyBytes)
+	return sha256.Sum256(pubKeyBytes)
 }
 
 // Equal compares one Signatory with another.
@@ -182,14 +181,14 @@ func (sig *Signatory) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// Hash returns a 256-bit SHA3 hash of the Signatories by converting them into
+// Hash returns a 256-bit SHA2 hash of the Signatories by converting them into
 // bytes and concatenating them to each other.
 func (sigs Signatories) Hash() Hash {
 	data := make([]byte, 0, 32*len(sigs))
 	for _, sig := range sigs {
 		data = append(data, sig[:]...)
 	}
-	return sha3.Sum256(data)
+	return sha256.Sum256(data)
 }
 
 func (sigs Signatories) Equal(other Signatories) bool {
