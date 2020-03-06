@@ -5,24 +5,17 @@ import (
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
-	"fmt"
+	"io"
+
+	"github.com/renproject/abi"
 )
 
 // Constants represent the length of the variables.
 const (
-	HashLength = 32
-
+	HashLength      = 32
 	SignatureLength = 65
-
 	SignatoryLength = 32
 )
-
-// ErrInvalidJsonBytes returns a error which is returned when unable to
-// unmarshal the json bytes because of the incorrect length of the bytes.
-func ErrInvalidJsonBytes(t interface{}, expected, got int) error {
-	return fmt.Errorf("fail to unmarshal json bytes to %T, expect bytes length %v, got %v", t, expected, got)
-}
 
 // Hashes defines a wrapper type around the []Hash type.
 type Hashes []Hash
@@ -41,37 +34,35 @@ func (hashes Hashes) Equal(other Hashes) bool {
 }
 
 // Hash defines the output of the 256-bit SHA2 hashing function.
-type Hash [32]byte
+type Hash abi.Bytes32
 
 // Equal compares one Hash with another.
 func (hash Hash) Equal(other Hash) bool {
 	return bytes.Equal(hash[:], other[:])
 }
 
-// String implements the `fmt.Stringer` interface for the Hash type.
+func (hash Hash) SizeHint() int {
+	return 32
+}
+
+func (hash Hash) Marshal(w io.Writer, m int) (int, error) {
+	return abi.Bytes32(hash).Marshal(w, m)
+}
+
+func (hash *Hash) Unmarshal(r io.Reader, m int) (int, error) {
+	return (*abi.Bytes32)(hash).Unmarshal(r, m)
+}
+
+func (hash Hash) MarshalJSON() ([]byte, error) {
+	return abi.Bytes32(hash).MarshalJSON()
+}
+
+func (hash *Hash) UnmarshalJSON(data []byte) error {
+	return (*abi.Bytes32)(hash).UnmarshalJSON(data)
+}
+
 func (hash Hash) String() string {
-	return base64.RawStdEncoding.EncodeToString(hash[:])
-}
-
-// MarshalText implements `encoding.TextMarshaler` so that it can be used as
-// key of a map when marshaling/unmarshaling.
-func (hash Hash) MarshalText() (text []byte, err error) {
-	return []byte(base64.RawStdEncoding.EncodeToString(hash[:])), nil
-}
-
-// MarshalText implements `encoding.TextUnmarshaler` so that it can be used as
-// key of a map when marshaling/unmarshaling.
-func (hash *Hash) UnmarshalText(text []byte) error {
-	data, err := base64.RawStdEncoding.DecodeString(string(text))
-	if err != nil {
-		return fmt.Errorf("error decoding hash text: %v", err)
-	}
-	if len(data) != HashLength {
-		return ErrInvalidJsonBytes(hash, HashLength, len(hash))
-	}
-
-	copy(hash[:], data)
-	return nil
+	return base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(hash[:])
 }
 
 // Signatures defines a wrapper type around the []Signature type.
@@ -107,79 +98,40 @@ func (sigs Signatures) String() string {
 }
 
 // Signature defines the ECDSA signature of a Hash. Encoded as R, S, V.
-type Signature [65]byte
+type Signature abi.Bytes65
 
 // Equal compares one Signature with another.
 func (sig Signature) Equal(other Signature) bool {
 	return bytes.Equal(sig[:], other[:])
 }
 
+func (sig Signature) SizeHint() int {
+	return 65
+}
+
+func (sig Signature) Marshal(w io.Writer, m int) (int, error) {
+	return abi.Bytes32(sig).Marshal(w, m)
+}
+
+func (sig *Signature) Unmarshal(r io.Reader, m int) (int, error) {
+	return (*abi.Bytes32)(sig).Unmarshal(r, m)
+}
+
+func (sig Signature) MarshalJSON() ([]byte, error) {
+	return abi.Bytes32(sig).MarshalJSON()
+}
+
+func (sig *Signature) UnmarshalJSON(data []byte) error {
+	return (*abi.Bytes32)(sig).UnmarshalJSON(data)
+}
+
 // String implements the `fmt.Stringer` interface for the Hash type.
 func (sig Signature) String() string {
-	return base64.RawStdEncoding.EncodeToString(sig[:])
-}
-
-// MarshalJSON implements the `json.Marshaler` interface for the Signature type.
-func (sig Signature) MarshalJSON() ([]byte, error) {
-	return json.Marshal(sig[:])
-}
-
-// UnmarshalJSON implements the `json.Unmarshaler` interface for the Signature type.
-func (sig *Signature) UnmarshalJSON(data []byte) error {
-	v := []byte{}
-	if err := json.Unmarshal(data, &v); err != nil {
-		return err
-	}
-	if len(v) != SignatureLength {
-		return ErrInvalidJsonBytes(*sig, SignatureLength, len(v))
-	}
-	copy(sig[:], v)
-	return nil
+	return base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(sig[:])
 }
 
 // Signatories defines a wrapper type around the []Signatory type.
 type Signatories []Signatory
-
-// Signatory defines the Hash of the ECDSA public key that is recovered from a
-// Signature.
-type Signatory [32]byte
-
-// NewSignatory returns the the Signatory of the given ECSDA.PublicKey
-func NewSignatory(pubKey ecdsa.PublicKey) Signatory {
-	pubKeyBytes := append(pubKey.X.Bytes(), pubKey.Y.Bytes()...)
-	return sha256.Sum256(pubKeyBytes)
-}
-
-// Equal compares one Signatory with another.
-func (sig Signatory) Equal(other Signatory) bool {
-	return bytes.Equal(sig[:], other[:])
-}
-
-// String implements the `fmt.Stringer` interface for the Signatory type.
-func (sig Signatory) String() string {
-	return base64.RawStdEncoding.EncodeToString(sig[:])
-}
-
-// MarshalText implements `encoding.TextMarshaler` so that it can be used as
-// key of a map when marshaling/unmarshaling.
-func (sig Signatory) MarshalText() (text []byte, err error) {
-	return []byte(base64.RawStdEncoding.EncodeToString(sig[:])), nil
-}
-
-// MarshalText implements `encoding.TextUnmarshaler` so that it can be used as
-// key of a map when marshaling/unmarshaling.
-func (sig *Signatory) UnmarshalText(text []byte) error {
-	data, err := base64.RawStdEncoding.DecodeString(string(text))
-	if err != nil {
-		return fmt.Errorf("error decoding signatory text: %v", err)
-	}
-	if len(data) != SignatoryLength {
-		return ErrInvalidJsonBytes(sig, SignatoryLength, len(sig))
-	}
-
-	copy(sig[:], data)
-	return nil
-}
 
 // Hash returns a 256-bit SHA2 hash of the Signatories by converting them into
 // bytes and concatenating them to each other.
@@ -206,5 +158,44 @@ func (sigs Signatories) Equal(other Signatories) bool {
 // String implements the `fmt.Stringer` interface for the Signatories type.
 func (sigs Signatories) String() string {
 	hash := sigs.Hash()
-	return base64.RawStdEncoding.EncodeToString(hash[:])
+	return base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(hash[:])
+}
+
+// Signatory defines the Hash of the ECDSA public key that is recovered from a
+// Signature.
+type Signatory abi.Bytes32
+
+// NewSignatory returns the the Signatory of the given ECSDA.PublicKey
+func NewSignatory(pubKey ecdsa.PublicKey) Signatory {
+	pubKeyBytes := append(pubKey.X.Bytes(), pubKey.Y.Bytes()...)
+	return Signatory(sha256.Sum256(pubKeyBytes))
+}
+
+// Equal compares one Signatory with another.
+func (sig Signatory) Equal(other Signatory) bool {
+	return bytes.Equal(sig[:], other[:])
+}
+
+func (sig Signatory) SizeHint() int {
+	return 32
+}
+
+func (sig Signatory) Marshal(w io.Writer, m int) (int, error) {
+	return abi.Bytes32(sig).Marshal(w, m)
+}
+
+func (sig *Signatory) Unmarshal(r io.Reader, m int) (int, error) {
+	return (*abi.Bytes32)(sig).Unmarshal(r, m)
+}
+
+func (sig Signatory) MarshalJSON() ([]byte, error) {
+	return abi.Bytes32(sig).MarshalJSON()
+}
+
+func (sig *Signatory) UnmarshalJSON(data []byte) error {
+	return (*abi.Bytes32)(sig).UnmarshalJSON(data)
+}
+
+func (sig Signatory) String() string {
+	return base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(sig[:])
 }
