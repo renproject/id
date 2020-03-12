@@ -110,19 +110,19 @@ func (sig Signature) SizeHint() int {
 }
 
 func (sig Signature) Marshal(w io.Writer, m int) (int, error) {
-	return abi.Bytes32(sig).Marshal(w, m)
+	return abi.Bytes65(sig).Marshal(w, m)
 }
 
 func (sig *Signature) Unmarshal(r io.Reader, m int) (int, error) {
-	return (*abi.Bytes32)(sig).Unmarshal(r, m)
+	return (*abi.Bytes65)(sig).Unmarshal(r, m)
 }
 
 func (sig Signature) MarshalJSON() ([]byte, error) {
-	return abi.Bytes32(sig).MarshalJSON()
+	return abi.Bytes65(sig).MarshalJSON()
 }
 
 func (sig *Signature) UnmarshalJSON(data []byte) error {
-	return (*abi.Bytes32)(sig).UnmarshalJSON(data)
+	return (*abi.Bytes65)(sig).UnmarshalJSON(data)
 }
 
 // String implements the `fmt.Stringer` interface for the Hash type.
