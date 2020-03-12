@@ -106,6 +106,8 @@ github.com/prometheus/procfs v0.0.3/go.mod h1:4A/X28fw3Fc593LaREMrKMqOKvUAntwMDa
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/renproject/abi v0.3.0 h1:Vny6SbbmltWSA49b8cQxcgPMZcmq2K0AN9L4l8CJVJ0=
 github.com/renproject/abi v0.3.0/go.mod h1:Ug37KRS/um6elthcIgCRrzDfyJquVE+4RYBS6ykbOQI=
+github.com/renproject/abi v0.4.1 h1:UbrC6CSGi7T2VBhKZO9EzRyvCpmTDV+gHCb+WVVTZiQ=
+github.com/renproject/abi v0.4.1/go.mod h1:Ug37KRS/um6elthcIgCRrzDfyJquVE+4RYBS6ykbOQI=
 github.com/renproject/hyperdrive v1.0.0/go.mod h1:kFiXW7enjQ5jzwprSr64B5HSCNvnXHfkLzz84R2gA/w=
 github.com/renproject/id v0.1.1/go.mod h1:i4OJzgjl4XLcU7nfU9UshX7PaBVpnTk3gEVj8dKa6f8=
 github.com/renproject/phi v0.1.0/go.mod h1:Hrxx2ONVpfByficRjyRd1trecalYr0lo7Z0akx8UXqg=
