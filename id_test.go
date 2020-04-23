@@ -46,7 +46,7 @@ var _ = Describe("ID", func() {
 		Context("when marshaling/unmarshaling", func() {
 			It("should equal itself after marshaling and then unmarshaling", func() {
 				test := func(hash Hash) bool {
-					data, err := json.Marshal(hash)
+					data, err := json.Marshal(&hash)
 					Expect(err).NotTo(HaveOccurred())
 
 					var newHash Hash

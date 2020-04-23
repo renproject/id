@@ -23,12 +23,12 @@ func (hash Hash) Equal(other Hash) bool {
 
 // SizeHint returns the number of bytes required to represent this Hash in
 // binary.
-func (hash *Hash) SizeHint() int {
+func (hash Hash) SizeHint() int {
 	return 32
 }
 
 // Marshal this Hash into binary.
-func (hash *Hash) Marshal(w io.Writer, m int) (int, error) {
+func (hash Hash) Marshal(w io.Writer, m int) (int, error) {
 	return (*abi.Bytes32)(hash).Marshal(w, m)
 }
 
@@ -39,7 +39,7 @@ func (hash *Hash) Unmarshal(r io.Reader, m int) (int, error) {
 
 // MarshalJSON implements the JSON marshaler interface for the Hash type. It is
 // represented as an unpadded base64 string.
-func (hash *Hash) MarshalJSON() ([]byte, error) {
+func (hash Hash) MarshalJSON() ([]byte, error) {
 	return (*abi.Bytes32)(hash).MarshalJSON()
 }
 
