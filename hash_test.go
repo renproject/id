@@ -65,7 +65,7 @@ var _ = Describe("Hashes", func() {
 			})
 
 			Context("when computing the merkle hash of three hash", func() {
-				FIt("should return the same merkle hash", func() {
+				It("should return the same merkle hash", func() {
 					f := func() bool {
 						hashes := make([]id.Hash, 3)
 						for i := range hashes {
