@@ -109,8 +109,8 @@ func NewMerkleHashInPlace(hashes []Hash) Hash {
 	}
 	for l := len(hashes) / 2; l >= 1; l = len(hashes) / 2 {
 		b := len(hashes) & 1
-		for i := b; i < l; i++ {
-			buf := (*[64]byte)(unsafe.Pointer(&hashes[i*2]))
+		for i := 0; i < l; i++ {
+			buf := (*[64]byte)(unsafe.Pointer(&hashes[b+i*2]))
 			hashes[b+i] = Hash(sha256.Sum256(buf[:]))
 		}
 		hashes = hashes[:b+l]
@@ -147,10 +147,10 @@ func NewMerkleHashInPlaceSafe(hashes []Hash) Hash {
 	}
 
 	b := len(hashes) & 1
-	for i := b; i < len(hashes)/2; i++ {
+	for i := 0; i < len(hashes)/2; i++ {
 		buf := [64]byte{}
-		copy(buf[:32], hashes[i*2][:])
-		copy(buf[32:], hashes[i*2+1][:])
+		copy(buf[:32], hashes[b+i*2][:])
+		copy(buf[32:], hashes[b+i*2+1][:])
 		hashes[b+i] = Hash(sha256.Sum256(buf[:]))
 	}
 	return NewMerkleHashInPlaceSafe(hashes[:b+len(hashes)/2])

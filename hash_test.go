@@ -2,6 +2,7 @@ package id_test
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"testing"
 	"testing/quick"
 
@@ -52,9 +53,11 @@ var _ = Describe("Hashes", func() {
 						for i := range hashes {
 							rand.Read(hashes[i][:])
 						}
+						expectedHash := id.Hash(sha256.Sum256(append(hashes[0][:], hashes[1][:]...)))
 						rootHash := id.NewMerkleHash(hashes)
 						safeRootHash := id.NewMerkleHashSafe(hashes)
-						Expect(rootHash).To(Equal(safeRootHash))
+						Expect(rootHash).To(Equal(expectedHash))
+						Expect(safeRootHash).To(Equal(expectedHash))
 						return true
 					}
 					Expect(quick.Check(f, nil)).To(Succeed())
@@ -62,15 +65,18 @@ var _ = Describe("Hashes", func() {
 			})
 
 			Context("when computing the merkle hash of three hash", func() {
-				It("should return the same merkle hash", func() {
+				FIt("should return the same merkle hash", func() {
 					f := func() bool {
 						hashes := make([]id.Hash, 3)
 						for i := range hashes {
 							rand.Read(hashes[i][:])
 						}
+						expectedHash := id.Hash(sha256.Sum256(append(hashes[1][:], hashes[2][:]...)))
+						expectedHash = id.Hash(sha256.Sum256(append(hashes[0][:], expectedHash[:]...)))
 						rootHash := id.NewMerkleHash(hashes)
 						safeRootHash := id.NewMerkleHashSafe(hashes)
-						Expect(rootHash).To(Equal(safeRootHash))
+						Expect(rootHash).To(Equal(expectedHash))
+						Expect(safeRootHash).To(Equal(expectedHash))
 						return true
 					}
 					Expect(quick.Check(f, nil)).To(Succeed())
