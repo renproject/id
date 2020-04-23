@@ -29,7 +29,7 @@ func (hash Hash) SizeHint() int {
 
 // Marshal this Hash into binary.
 func (hash Hash) Marshal(w io.Writer, m int) (int, error) {
-	return (*abi.Bytes32)(hash).Marshal(w, m)
+	return abi.Bytes32(hash).Marshal(w, m)
 }
 
 // Unmarshal from binary into this Hash.
@@ -40,7 +40,7 @@ func (hash *Hash) Unmarshal(r io.Reader, m int) (int, error) {
 // MarshalJSON implements the JSON marshaler interface for the Hash type. It is
 // represented as an unpadded base64 string.
 func (hash Hash) MarshalJSON() ([]byte, error) {
-	return (*abi.Bytes32)(hash).MarshalJSON()
+	return abi.Bytes32(hash).MarshalJSON()
 }
 
 // UnmarshalJSON implements the JSON marshaler interface for the Hash type. It
