@@ -12,7 +12,6 @@ import (
 
 // Constants represent the length of the variables.
 const (
-	HashLength      = 32
 	SignatureLength = 65
 	SignatoryLength = 32
 )
@@ -31,38 +30,6 @@ func (hashes Hashes) Equal(other Hashes) bool {
 		}
 	}
 	return true
-}
-
-// Hash defines the output of the 256-bit SHA2 hashing function.
-type Hash abi.Bytes32
-
-// Equal compares one Hash with another.
-func (hash Hash) Equal(other Hash) bool {
-	return bytes.Equal(hash[:], other[:])
-}
-
-func (hash Hash) SizeHint() int {
-	return 32
-}
-
-func (hash Hash) Marshal(w io.Writer, m int) (int, error) {
-	return abi.Bytes32(hash).Marshal(w, m)
-}
-
-func (hash *Hash) Unmarshal(r io.Reader, m int) (int, error) {
-	return (*abi.Bytes32)(hash).Unmarshal(r, m)
-}
-
-func (hash Hash) MarshalJSON() ([]byte, error) {
-	return abi.Bytes32(hash).MarshalJSON()
-}
-
-func (hash *Hash) UnmarshalJSON(data []byte) error {
-	return (*abi.Bytes32)(hash).UnmarshalJSON(data)
-}
-
-func (hash Hash) String() string {
-	return base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(hash[:])
 }
 
 // Signatures defines a wrapper type around the []Signature type.
