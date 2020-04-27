@@ -49,9 +49,9 @@ func (hash *Hash) UnmarshalJSON(data []byte) error {
 	return (*abi.Bytes32)(hash).UnmarshalJSON(data)
 }
 
-// String returns the unpadded base64 string representation of the Hash.
+// String returns the unpadded base64 URL string representation of the Hash.
 func (hash Hash) String() string {
-	return base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(hash[:])
+	return base64.RawURLEncoding.EncodeToString(hash[:])
 }
 
 // NewMerkleHash returns the root hash of the merkle tree that uses the hashes
