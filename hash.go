@@ -155,3 +155,28 @@ func NewMerkleHashInPlaceSafe(hashes []Hash) Hash {
 	}
 	return NewMerkleHashInPlaceSafe(hashes[:b+len(hashes)/2])
 }
+
+// NewMerkleHashFromSignatories is the same as NewMerkleHash but it accepts a
+// slice of Signatories instead of a slice of Hashes.
+func NewMerkleHashFromSignatories(signatories []Signatory) Hash {
+	dst := make([]Signatory, len(signatories))
+	copy(dst, signatories)
+	return NewMerkleHashFromSignatoriesInPlace(dst)
+}
+
+// NewMerkleHashFromSignatoriesInPlace is the same as NewMerkleHashInPlace but
+// it accepts a slice of Signatories instead of a slice of Hashes.
+func NewMerkleHashFromSignatoriesInPlace(signatories []Signatory) Hash {
+	if len(signatories) == 0 {
+		return Hash{}
+	}
+	for l := len(signatories) / 2; l >= 1; l = len(signatories) / 2 {
+		b := len(signatories) & 1
+		for i := 0; i < l; i++ {
+			buf := (*[64]byte)(unsafe.Pointer(&signatories[b+i*2]))
+			signatories[b+i] = Signatory(sha256.Sum256(buf[:]))
+		}
+		signatories = signatories[:b+l]
+	}
+	return Hash(signatories[0])
+}
