@@ -4,20 +4,29 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"io"
 	"unsafe"
 
-	"github.com/renproject/abi"
+	"github.com/renproject/surge"
 )
 
-// HashLength defines the length of all Hashes as 32 bytes.
+// HashLength defines the length of a Hash in bytes.
 const HashLength = 32
 
 // Hash defines the output of the 256-bit SHA2 hashing function.
-type Hash abi.Bytes32
+type Hash [32]byte
 
-// Equal compares one Hash with another.
-func (hash Hash) Equal(other Hash) bool {
+// NewHash consumes a slice of bytes and hashes it using the 256-bit SHA2
+// hashing function.
+func NewHash(data []byte) Hash {
+	return sha256.Sum256(data)
+}
+
+// Equal compares one Hash with another. If they are equal, then it returns
+// true, otherwise it returns false.
+func (hash Hash) Equal(other *Hash) bool {
 	return bytes.Equal(hash[:], other[:])
 }
 
@@ -29,24 +38,50 @@ func (hash Hash) SizeHint() int {
 
 // Marshal this Hash into binary.
 func (hash Hash) Marshal(w io.Writer, m int) (int, error) {
-	return abi.Bytes32(hash).Marshal(w, m)
+	if m < 32 {
+		return m, surge.ErrMaxBytesExceeded
+	}
+	n, err := w.Write(hash[:])
+	if n != 32 {
+		return m - n, fmt.Errorf("expected hash len=32, got hash len=%v", n)
+	}
+	return m - n, err
 }
 
 // Unmarshal from binary into this Hash.
 func (hash *Hash) Unmarshal(r io.Reader, m int) (int, error) {
-	return (*abi.Bytes32)(hash).Unmarshal(r, m)
+	if m < 32 {
+		return m, surge.ErrMaxBytesExceeded
+	}
+	n, err := r.Read(hash[:])
+	if n != 32 {
+		return m - n, fmt.Errorf("expected hash len=32, got hash len=%v", n)
+	}
+	return m - n, err
 }
 
 // MarshalJSON implements the JSON marshaler interface for the Hash type. It is
 // represented as an unpadded base64 string.
 func (hash Hash) MarshalJSON() ([]byte, error) {
-	return abi.Bytes32(hash).MarshalJSON()
+	return json.Marshal(base64.RawURLEncoding.EncodeToString(hash[:]))
 }
 
-// UnmarshalJSON implements the JSON marshaler interface for the Hash type. It
+// UnmarshalJSON implements the JSON unmarshaler interface for the Hash type. It
 // assumes that it has been represented as an unpadded base64 string.
 func (hash *Hash) UnmarshalJSON(data []byte) error {
-	return (*abi.Bytes32)(hash).UnmarshalJSON(data)
+	str := ""
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	decoded, err := base64.RawURLEncoding.DecodeString(str)
+	if err != nil {
+		return err
+	}
+	if len(decoded) != 32 {
+		return fmt.Errorf("expected len=32, got len=%v", len(decoded))
+	}
+	copy(hash[:], decoded)
+	return nil
 }
 
 // String returns the unpadded base64 URL string representation of the Hash.
