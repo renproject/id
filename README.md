@@ -1,10 +1,14 @@
 # `🔒 id`
 
-[![CircleCI](https://circleci.com/gh/renproject/id/tree/master.svg?style=shield)](https://circleci.com/gh/renproject/hyperdrive/tree/master)
+[![GitHub](https://github.com/renproject/id/workflows/test/badge.svg)](https://github.com/renproject/id/workflows/test/badge.svg)
 ![Go Report](https://goreportcard.com/badge/github.com/renproject/id)
-[![Coverage Status](https://coveralls.io/repos/github/renproject/id/badge.svg)](https://coveralls.io/github/renproject/id)
 
-ECDSA identification for content and content authorship
+ECDSA identification for content and content authorship. Supports:
+
+- [x] hashing,
+- [x] merkle trees,
+- [x] signing, and
+- [x] verification.
 
 ## Contributors
 

@@ -1,0 +1,31 @@
+name: test
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.14.0'
+    - uses: actions/cache@v1
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    - name: Run vetting and linting
+      run: |
+        export PATH=$PATH:$(go env GOPATH)/bin
+        go get -u golang.org/x/lint/golint
+        cd $GITHUB_WORKSPACE
+        go vet ./...
+        golint ./...
+    - name: Run tests
+      env:
+          COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+          CI: true
+      run: |
+        export PATH=$PATH:$(go env GOPATH)/bin
+        cd $GITHUB_WORKSPACE
+        go test -v --race
