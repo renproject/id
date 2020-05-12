@@ -1,8 +1,10 @@
 # `🔒 id`
 
 [![GitHub](https://github.com/renproject/id/workflows/test/badge.svg)](https://github.com/renproject/id/workflows/test/badge.svg)
-![Go Report](https://goreportcard.com/badge/github.com/renproject/id)
-[![Coverage Status](https://coveralls.io/repos/github/renproject/id/badge.svg?branch=master)](https://coveralls.io/github/renproject/id?branch=master)
+[![Coverage](https://coveralls.io/repos/github/renproject/id/badge.svg?branch=master)](https://coveralls.io/github/renproject/id?branch=master)
+[![Report](https://goreportcard.com/badge/github.com/renproject/id)](https://goreportcard.com/badge/github.com/renproject/id)
+
+[Documentation](https://godoc.org/github.com/renproject/id)
 
 ECDSA identification for content and content authorship. Supports:
 
