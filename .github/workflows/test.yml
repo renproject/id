@@ -14,11 +14,17 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
-    - name: Run vetting and linting
+    - name: Run vetting
       run: |
+        cd $GITHUB_WORKSPACE
+        export PATH=$PATH:$(go env GOPATH)/bin
+        cd $GITHUB_WORKSPACE
+        go vet ./...
+    - name: Run linting
+      run: |
+        cd $GITHUB_WORKSPACE
         export PATH=$PATH:$(go env GOPATH)/bin
         go get -u golang.org/x/lint/golint
-        cd $GITHUB_WORKSPACE
         go vet ./...
         golint ./...
     - name: Run tests
@@ -26,6 +32,8 @@ jobs:
           COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
           CI: true
       run: |
-        export PATH=$PATH:$(go env GOPATH)/bin
         cd $GITHUB_WORKSPACE
-        go test -v --race
+        export PATH=$PATH:$(go env GOPATH)/bin
+        go get -u github.com/mattn/goveralls
+        go test -v --race --cover
+        goveralls -coverprofile=id.coverprofile -service=circleci -repotoken $COVERALLS_TOKEN
