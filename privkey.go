@@ -11,12 +11,17 @@ import (
 )
 
 const (
+	// PrivKeyLength is the length of an secp256k1 ECDSA private key in bytes.
 	PrivKeyLength = 32
-	PubKeyLength  = 64
+	// PubKeyLength is the length of an secp256k1 ECDSA public key in bytes.
+	PubKeyLength = 64
 )
 
+// PrivKey is an secp256k1 ECDSA private key.
 type PrivKey ecdsa.PrivateKey
 
+// NewPrivKey generates a random PrivKey and returns it. This function will
+// panic if there is an error generating the PrivKey.
 func NewPrivKey() *PrivKey {
 	privKey, err := crypto.GenerateKey()
 	if err != nil {
@@ -25,6 +30,7 @@ func NewPrivKey() *PrivKey {
 	return (*PrivKey)(privKey)
 }
 
+// Sign a Hash and return the resulting Signature, or error.
 func (privKey PrivKey) Sign(hash *Hash) (Signature, error) {
 	rsv, err := crypto.Sign(hash[:], (*ecdsa.PrivateKey)(&privKey))
 	if err != nil {
@@ -38,14 +44,19 @@ func (privKey PrivKey) Sign(hash *Hash) (Signature, error) {
 	return signature, nil
 }
 
+// Signatory returns the public identity generated from the public key
+// associated with this PrivKey.
 func (privKey PrivKey) Signatory() Signatory {
 	return NewSignatory(&privKey.PublicKey)
 }
 
+// SizeHint returns the numbers of bytes required to represent this PrivKey in
+// binary.
 func (privKey PrivKey) SizeHint() int {
 	return 32
 }
 
+// Marshal this PrivKey into binary.
 func (privKey PrivKey) Marshal(w io.Writer, m int) (int, error) {
 	if m < 32 {
 		return m, surge.ErrMaxBytesExceeded
@@ -60,6 +71,7 @@ func (privKey PrivKey) Marshal(w io.Writer, m int) (int, error) {
 	return m - n, err
 }
 
+// Unmarshal from binary into this PrivKey.
 func (privKey *PrivKey) Unmarshal(r io.Reader, m int) (int, error) {
 	if m < 32 {
 		return m, surge.ErrMaxBytesExceeded
