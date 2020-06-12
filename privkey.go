@@ -2,6 +2,8 @@ package id
 
 import (
 	"crypto/ecdsa"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
@@ -92,4 +94,28 @@ func (privKey *PrivKey) Unmarshal(r io.Reader, m int) (int, error) {
 		Y:     y,
 	}
 	return m - n, nil
+}
+
+// MarshalJSON implements the JSON marshaler interface by representing this
+// private key as a base64 string.
+func (privKey PrivKey) MarshalJSON() ([]byte, error) {
+	data, err := surge.ToBinary(privKey)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(base64.RawURLEncoding.EncodeToString(data))
+}
+
+// UnmarshalJSON implements the JSON unmarshaler interface by representing this
+// private key as a base64 string.
+func (privKey *PrivKey) UnmarshalJSON(data []byte) error {
+	str := ""
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	data, err := base64.RawURLEncoding.DecodeString(str)
+	if err != nil {
+		return err
+	}
+	return surge.FromBinary(data, privKey)
 }

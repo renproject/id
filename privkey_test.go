@@ -1,6 +1,7 @@
 package id_test
 
 import (
+	"encoding/json"
 	"testing/quick"
 
 	. "github.com/onsi/ginkgo"
@@ -37,6 +38,24 @@ var _ = Describe("Private keys", func() {
 				Expect(err).ToNot(HaveOccurred())
 				unmarshaled := id.PrivKey{}
 				err = surge.FromBinary(marshaled, &unmarshaled)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(privKey.D.Cmp(unmarshaled.D)).To(Equal(0))
+				Expect(privKey.X.Cmp(unmarshaled.X)).To(Equal(0))
+				Expect(privKey.Y.Cmp(unmarshaled.Y)).To(Equal(0))
+				return true
+			}
+			Expect(quick.Check(f, nil)).To(Succeed())
+		})
+	})
+
+	Context("when marshal and then unmarshaling using JSON", func() {
+		It("should equal itself", func() {
+			f := func() bool {
+				privKey := id.NewPrivKey()
+				marshaled, err := json.Marshal(privKey)
+				Expect(err).ToNot(HaveOccurred())
+				unmarshaled := id.PrivKey{}
+				err = json.Unmarshal(marshaled, &unmarshaled)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(privKey.D.Cmp(unmarshaled.D)).To(Equal(0))
 				Expect(privKey.X.Cmp(unmarshaled.X)).To(Equal(0))
