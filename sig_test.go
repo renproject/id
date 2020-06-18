@@ -19,7 +19,7 @@ var _ = Describe("Signatures", func() {
 				marshaled, err := surge.ToBinary(sig)
 				Expect(err).ToNot(HaveOccurred())
 				unmarshaled := id.Signature{}
-				err = surge.FromBinary(marshaled, &unmarshaled)
+				err = surge.FromBinary(&unmarshaled, marshaled)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(sig.Equal(&unmarshaled)).To(BeTrue())
 				return true
@@ -35,7 +35,7 @@ var _ = Describe("Signatures", func() {
 					return true
 				}
 				unmarshaled := id.Signature{}
-				err := surge.FromBinary(data, &unmarshaled)
+				err := surge.FromBinary(&unmarshaled, data)
 				Expect(err).To(HaveOccurred())
 				return true
 			}
@@ -93,7 +93,7 @@ var _ = Describe("Signatories", func() {
 				marshaled, err := surge.ToBinary(sig)
 				Expect(err).ToNot(HaveOccurred())
 				unmarshaled := id.Signatory{}
-				err = surge.FromBinary(marshaled, &unmarshaled)
+				err = surge.FromBinary(&unmarshaled, marshaled)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(sig.Equal(&unmarshaled)).To(BeTrue())
 				return true
@@ -109,7 +109,7 @@ var _ = Describe("Signatories", func() {
 					return true
 				}
 				unmarshaled := id.Signatory{}
-				err := surge.FromBinary(data, &unmarshaled)
+				err := surge.FromBinary(&unmarshaled, data)
 				Expect(err).To(HaveOccurred())
 				return true
 			}

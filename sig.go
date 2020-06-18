@@ -2,12 +2,10 @@ package id
 
 import (
 	"bytes"
-	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/renproject/surge"
@@ -15,13 +13,13 @@ import (
 
 // Constants represent the length of the variables.
 const (
-	SignatureLength = 65
-	SignatoryLength = 32
+	SizeHintSignature = 65
+	SizeHintSignatory = 32
 )
 
 // Signature defines an ECDSA signature of a Hash, encoded as [R || S || V]
 // where V is either 0 or 1.
-type Signature [65]byte
+type Signature [SizeHintSignature]byte
 
 // Signatory returns the that signed the Hash to produce this Signature.
 func (signature Signature) Signatory(hash *Hash) (Signatory, error) {
@@ -29,7 +27,7 @@ func (signature Signature) Signatory(hash *Hash) (Signatory, error) {
 	if err != nil {
 		return Signatory{}, fmt.Errorf("identifying signature=%v: %v", signature, err)
 	}
-	return NewSignatory(pubKey), nil
+	return NewSignatory((*PubKey)(pubKey)), nil
 }
 
 // Equal compares one Signature with another. If they are equal, then it returns
@@ -38,34 +36,27 @@ func (signature Signature) Equal(other *Signature) bool {
 	return bytes.Equal(signature[:], other[:])
 }
 
-// SizeHint returns the number of bytes required to represent this Signature in
-// binary.
-func (signature Signature) SizeHint() int {
-	return 65
+// SizeHint returns the number of bytes required to represent a Signature in binary.
+func (Signature) SizeHint() int {
+	return SizeHintSignature
 }
 
-// Marshal this Signature into binary.
-func (signature Signature) Marshal(w io.Writer, m int) (int, error) {
-	if m < 65 {
-		return m, surge.ErrMaxBytesExceeded
+// Marshal into binary.
+func (signature Signature) Marshal(buf []byte, rem int) ([]byte, int, error) {
+	if len(buf) < SizeHintSignature || rem < SizeHintSignature {
+		return buf, rem, surge.ErrUnexpectedEndOfBuffer
 	}
-	n, err := w.Write(signature[:])
-	if n != 65 {
-		return m - n, fmt.Errorf("expected signature len=65, got signature len=%v", n)
-	}
-	return m - n, err
+	copy(buf, signature[:])
+	return buf[SizeHintSignature:], rem - SizeHintSignature, nil
 }
 
-// Unmarshal from binary into this Signature.
-func (signature *Signature) Unmarshal(r io.Reader, m int) (int, error) {
-	if m < 65 {
-		return m, surge.ErrMaxBytesExceeded
+// Unmarshal from binary.
+func (signature *Signature) Unmarshal(buf []byte, rem int) ([]byte, int, error) {
+	if len(buf) < SizeHintSignature || rem < SizeHintSignature {
+		return buf, rem, surge.ErrUnexpectedEndOfBuffer
 	}
-	n, err := r.Read(signature[:])
-	if n != 65 {
-		return m - n, fmt.Errorf("expected signature len=65, got signature len=%v", n)
-	}
-	return m - n, err
+	copy(signature[:], buf[:SizeHintSignature])
+	return buf[SizeHintSignature:], rem - SizeHintSignature, nil
 }
 
 // MarshalJSON implements the JSON marshaler interface for the Signature type.
@@ -85,8 +76,8 @@ func (signature *Signature) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	if len(decoded) != 65 {
-		return fmt.Errorf("expected len=65, got len=%v", len(decoded))
+	if len(decoded) != SizeHintSignature {
+		return fmt.Errorf("expected len=%v, got len=%v", SizeHintSignature, len(decoded))
 	}
 	copy(signature[:], decoded)
 	return nil
@@ -100,10 +91,10 @@ func (signature Signature) String() string {
 
 // Signatory defines the Hash of the ECDSA public key that is recovered from a
 // Signature.
-type Signatory [32]byte
+type Signatory [SizeHintSignatory]byte
 
 // NewSignatory returns the the Signatory of the given ECSDA.PublicKey
-func NewSignatory(pubKey *ecdsa.PublicKey) Signatory {
+func NewSignatory(pubKey *PubKey) Signatory {
 	x := [32]byte{}
 	xData := pubKey.X.Bytes()
 	copy(x[32-len(xData):], xData)
@@ -122,34 +113,27 @@ func (signatory Signatory) Equal(other *Signatory) bool {
 	return bytes.Equal(signatory[:], other[:])
 }
 
-// SizeHint returns the number of bytes required to represent this Signatory in
-// binary.
-func (signatory Signatory) SizeHint() int {
-	return 32
+// SizeHint returns the number of bytes required to represent a Signatory in binary.
+func (Signatory) SizeHint() int {
+	return SizeHintSignatory
 }
 
-// Marshal this Signatory into binary.
-func (signatory Signatory) Marshal(w io.Writer, m int) (int, error) {
-	if m < 32 {
-		return m, surge.ErrMaxBytesExceeded
+// Marshal into binary.
+func (signatory Signatory) Marshal(buf []byte, rem int) ([]byte, int, error) {
+	if len(buf) < SizeHintSignatory || rem < SizeHintSignatory {
+		return buf, rem, surge.ErrUnexpectedEndOfBuffer
 	}
-	n, err := w.Write(signatory[:])
-	if n != 32 {
-		return m - n, fmt.Errorf("expected signatory len=32, got signatory len=%v", n)
-	}
-	return m - n, err
+	copy(buf, signatory[:])
+	return buf[SizeHintSignatory:], rem - SizeHintSignatory, nil
 }
 
-// Unmarshal from binary into this Signatory.
-func (signatory *Signatory) Unmarshal(r io.Reader, m int) (int, error) {
-	if m < 32 {
-		return m, surge.ErrMaxBytesExceeded
+// Unmarshal from binary.
+func (signatory *Signatory) Unmarshal(buf []byte, rem int) ([]byte, int, error) {
+	if len(buf) < SizeHintSignatory || rem < SizeHintSignatory {
+		return buf, rem, surge.ErrUnexpectedEndOfBuffer
 	}
-	n, err := r.Read(signatory[:])
-	if n != 32 {
-		return m - n, fmt.Errorf("expected signatory len=32, got signatory len=%v", n)
-	}
-	return m - n, err
+	copy(signatory[:], buf[:SizeHintSignatory])
+	return buf[SizeHintSignatory:], rem - SizeHintSignatory, nil
 }
 
 // MarshalJSON implements the JSON marshaler interface for the Signatory type.
@@ -169,8 +153,8 @@ func (signatory *Signatory) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	if len(decoded) != 32 {
-		return fmt.Errorf("expected len=32, got len=%v", len(decoded))
+	if len(decoded) != SizeHintSignatory {
+		return fmt.Errorf("expected len=%v, got len=%v", SizeHintSignatory, len(decoded))
 	}
 	copy(signatory[:], decoded)
 	return nil

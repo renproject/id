@@ -35,7 +35,7 @@ var _ = Describe("Hashes", func() {
 				marshaled, err := surge.ToBinary(hash)
 				Expect(err).ToNot(HaveOccurred())
 				unmarshaled := id.Hash{}
-				err = surge.FromBinary(marshaled, &unmarshaled)
+				err = surge.FromBinary(&unmarshaled, marshaled)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(hash.Equal(&unmarshaled)).To(BeTrue())
 				return true
@@ -51,7 +51,7 @@ var _ = Describe("Hashes", func() {
 					return true
 				}
 				unmarshaled := id.Hash{}
-				err := surge.FromBinary(data, &unmarshaled)
+				err := surge.FromBinary(&unmarshaled, data)
 				Expect(err).To(HaveOccurred())
 				return true
 			}

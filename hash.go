@@ -6,17 +6,16 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
 	"unsafe"
 
 	"github.com/renproject/surge"
 )
 
-// HashLength defines the length of a Hash in bytes.
-const HashLength = 32
+// SizeHintHash is the number of bytes required to represent a Hash in binary.
+const SizeHintHash = 32
 
 // Hash defines the output of the 256-bit SHA2 hashing function.
-type Hash [32]byte
+type Hash [SizeHintHash]byte
 
 // NewHash consumes a slice of bytes and hashes it using the 256-bit SHA2
 // hashing function.
@@ -30,34 +29,27 @@ func (hash Hash) Equal(other *Hash) bool {
 	return bytes.Equal(hash[:], other[:])
 }
 
-// SizeHint returns the number of bytes required to represent this Hash in
-// binary.
-func (hash Hash) SizeHint() int {
-	return 32
+// SizeHint returns the number of bytes required to represent a Hash in binary.
+func (Hash) SizeHint() int {
+	return SizeHintHash
 }
 
-// Marshal this Hash into binary.
-func (hash Hash) Marshal(w io.Writer, m int) (int, error) {
-	if m < 32 {
-		return m, surge.ErrMaxBytesExceeded
+// Marshal into binary.
+func (hash Hash) Marshal(buf []byte, rem int) ([]byte, int, error) {
+	if len(buf) < SizeHintHash || rem < SizeHintHash {
+		return buf, rem, surge.ErrUnexpectedEndOfBuffer
 	}
-	n, err := w.Write(hash[:])
-	if n != 32 {
-		return m - n, fmt.Errorf("expected hash len=32, got hash len=%v", n)
-	}
-	return m - n, err
+	copy(buf, hash[:])
+	return buf[SizeHintHash:], rem - SizeHintHash, nil
 }
 
-// Unmarshal from binary into this Hash.
-func (hash *Hash) Unmarshal(r io.Reader, m int) (int, error) {
-	if m < 32 {
-		return m, surge.ErrMaxBytesExceeded
+// Unmarshal from binary.
+func (hash *Hash) Unmarshal(buf []byte, rem int) ([]byte, int, error) {
+	if len(buf) < SizeHintHash || rem < SizeHintHash {
+		return buf, rem, surge.ErrUnexpectedEndOfBuffer
 	}
-	n, err := r.Read(hash[:])
-	if n != 32 {
-		return m - n, fmt.Errorf("expected hash len=32, got hash len=%v", n)
-	}
-	return m - n, err
+	copy(hash[:], buf[:SizeHintHash])
+	return buf[SizeHintHash:], rem - SizeHintHash, nil
 }
 
 // MarshalJSON implements the JSON marshaler interface for the Hash type. It is
@@ -77,8 +69,8 @@ func (hash *Hash) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	if len(decoded) != 32 {
-		return fmt.Errorf("expected len=32, got len=%v", len(decoded))
+	if len(decoded) != SizeHintHash {
+		return fmt.Errorf("expected len=%v, got len=%v", SizeHintHash, len(decoded))
 	}
 	copy(hash[:], decoded)
 	return nil

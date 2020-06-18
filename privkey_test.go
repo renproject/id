@@ -37,7 +37,7 @@ var _ = Describe("Private keys", func() {
 				marshaled, err := surge.ToBinary(privKey)
 				Expect(err).ToNot(HaveOccurred())
 				unmarshaled := id.PrivKey{}
-				err = surge.FromBinary(marshaled, &unmarshaled)
+				err = surge.FromBinary(&unmarshaled, marshaled)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(privKey.D.Cmp(unmarshaled.D)).To(Equal(0))
 				Expect(privKey.X.Cmp(unmarshaled.X)).To(Equal(0))
@@ -73,7 +73,7 @@ var _ = Describe("Private keys", func() {
 					return true
 				}
 				unmarshaled := id.PrivKey{}
-				err := surge.FromBinary(data, &unmarshaled)
+				err := surge.FromBinary(&unmarshaled, data)
 				Expect(err).To(HaveOccurred())
 				return true
 			}
