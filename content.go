@@ -48,5 +48,5 @@ func (blob Blob) Hash() (Hash, error) {
 	if err != nil {
 		return Hash{}, err
 	}
-	return NewHash(buf)
+	return NewHash(buf), nil
 }
